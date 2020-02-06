@@ -28,4 +28,12 @@ public interface InfoService {
      * @return
      */
     Object getCourses(String username, String password, String xnm, String xqm);
+
+    /**
+     * 获取水电费余额
+     * @param buildId
+     * @param roomCode
+     * @return
+     */
+    String getUtility(String buildId, String roomCode);
 }

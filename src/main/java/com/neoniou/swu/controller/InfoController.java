@@ -54,6 +54,21 @@ public class InfoController {
         return ResponseEntity.ok().body(infoService.getCourses(username, password, xnm, xqm));
     }
 
+    /**
+     * 获取水电费余额
+     * @param buildId
+     * @param roomCode
+     * @return
+     */
+    @GetMapping("/utility")
+    public ResponseEntity<String> getUtility(@RequestParam("buildId") String buildId,
+                                             @RequestParam("roomCode") String roomCode) {
+        if (roomCode.length() != 4) {
+            roomCode = "0" + roomCode;
+        }
+        return ResponseEntity.ok().body(infoService.getUtility(buildId, roomCode));
+    }
+
     @GetMapping("/hello")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok().body("hello!");

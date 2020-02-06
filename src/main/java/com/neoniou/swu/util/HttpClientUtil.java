@@ -31,12 +31,9 @@ public class HttpClientUtil {
 
     private PoolingHttpClientConnectionManager httpClientPool;
 
-    private static final String UAAAP_URL = "https://uaaap.swu.edu.cn/cas/login?service=http://i.swu.edu.cn/PersonalApplications/viewPageV3";
     private static final String GRADE_URL = "http://jw.swu.edu.cn/jwglxt/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=N305005";
     private static final String COURSE_URL = "http://jw.swu.edu.cn/jwglxt/kbcx/xskbcx_cxXsKb.html?gnmkdm=N2151";
-
-    private String cookie;
-    private String lt;
+    private static final String UTILITY_URL = "http://211.83.23.198/account.do?command=login";
 
     /**
      * Constructor
@@ -46,59 +43,6 @@ public class HttpClientUtil {
         //配置
         this.httpClientPool.setMaxTotal(100);
         this.httpClientPool.setDefaultMaxPerRoute(10);
-    }
-
-    /**
-     * 验证用户名密码
-     * @return 用户名密码是否正确
-     */
-    public Boolean checkAccount(final String username, final String password) {
-
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(this.httpClientPool).build();
-        //获取 cookie 和 lt
-        this.getCookieAndLt();
-
-        HttpPost httpPost = new HttpPost(UAAAP_URL);
-        httpPost.setConfig(this.getConfig());
-
-        // Request头信息
-        httpPost.setHeader("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (" +
-                "KHTML, like Gecko) Chrome/79.0.3945.130 Mobile Safari/537.36");
-        httpPost.setHeader("Cookie", cookie);
-
-        // loginForm
-        ArrayList<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("username", username));
-        params.add(new BasicNameValuePair("password", password));
-        params.add(new BasicNameValuePair("lt", lt));
-        params.add(new BasicNameValuePair("execution", "e1s1"));
-        params.add(new BasicNameValuePair("_eventId", "submit"));
-        params.add(new BasicNameValuePair("isQrSubmit", "false"));
-        params.add(new BasicNameValuePair("qrValue", ""));
-
-        CloseableHttpResponse response = null;
-        try {
-            // 放入 form
-            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params, "utf8");
-            httpPost.setEntity(formEntity);
-
-            response = httpClient.execute(httpPost);
-
-            // 302重定向登陆成功
-            if (302 == response.getStatusLine().getStatusCode()) {
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                assert response != null;
-                response.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
     }
 
     /**
@@ -116,12 +60,11 @@ public class HttpClientUtil {
         CloseableHttpResponse response = null;
         try {
             URIBuilder uriBuilder = new URIBuilder(GRADE_URL);
-            //输入网址，创建 Post 请求对象
+
             HttpPost httpPost = new HttpPost(uriBuilder.build());
 
             httpPost.setHeader("Cookie", cookie);
 
-            //参数
             ArrayList<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("xnm", xnm));
             params.add(new BasicNameValuePair("xqm", xqm));
@@ -135,10 +78,8 @@ public class HttpClientUtil {
             UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params, "utf8");
             httpPost.setEntity(formEntity);
 
-            //发起请求
             response = httpClient.execute(httpPost);
 
-            //解析响应
             if (200 == response.getStatusLine().getStatusCode()) {
                 HttpEntity httpEntity = response.getEntity();
 
@@ -158,6 +99,13 @@ public class HttpClientUtil {
         return "";
     }
 
+    /**
+     * 获取课程信息
+     * @param cookie
+     * @param xnm
+     * @param xqm
+     * @return
+     */
     public String getCourses(final String cookie, final String xnm, final String xqm) {
 
         CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(this.httpClientPool).build();
@@ -165,12 +113,11 @@ public class HttpClientUtil {
         CloseableHttpResponse response = null;
         try {
             URIBuilder uriBuilder = new URIBuilder(COURSE_URL);
-            //输入网址，创建 Post 请求对象
+
             HttpPost httpPost = new HttpPost(uriBuilder.build());
 
             httpPost.setHeader("Cookie", cookie);
 
-            //参数
             ArrayList<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("xnm", xnm));
             params.add(new BasicNameValuePair("xqm", xqm));
@@ -178,10 +125,8 @@ public class HttpClientUtil {
             UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params, "utf8");
             httpPost.setEntity(formEntity);
 
-            //发起请求
             response = httpClient.execute(httpPost);
 
-            //解析响应
             if (200 == response.getStatusLine().getStatusCode()) {
                 HttpEntity httpEntity = response.getEntity();
 
@@ -200,40 +145,47 @@ public class HttpClientUtil {
         return "";
     }
 
+
     /**
-     * 获取 Cookie 和 Lt
+     * 查询水电费
+     * @param buildId 寝室 id
+     * @param roomCode 寝室门牌号
+     * @return 水电费余额
      */
-    private void getCookieAndLt() {
-
+    public String getUtility(final String buildId, final String roomCode) {
         CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(this.httpClientPool).build();
-
-        HttpGet httpGet = new HttpGet(UAAAP_URL);
-        httpGet.setConfig(this.getConfig());
 
         CloseableHttpResponse response = null;
         try {
-            response = httpClient.execute(httpGet);
-            //响应结果
+            URIBuilder uriBuilder = new URIBuilder(UTILITY_URL);
+
+            HttpPost httpPost = new HttpPost(uriBuilder.build());
+
+            ArrayList<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("buildid", buildId));
+            params.add(new BasicNameValuePair("roomcode", roomCode));
+            params.add(new BasicNameValuePair("ckcode", "2e5g"));
+
+            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params, "utf8");
+            httpPost.setEntity(formEntity);
+
+            response = httpClient.execute(httpPost);
+
             if (200 == response.getStatusLine().getStatusCode()) {
-
-                //获取 lt
                 HttpEntity httpEntity = response.getEntity();
-                String content = EntityUtils.toString(httpEntity, "utf-8");
-                Document dom = Jsoup.parse(content);
 
-                Elements elements = dom.getElementsByTag("input");
-                for (Element element : elements) {
-                    if (element.toString().contains("lt")) {
-                        lt = element.toString().substring(38, 111);
+                Document dom = Jsoup.parse(EntityUtils.toString(httpEntity));
+                Elements bgc = dom.getElementsByClass("bgc_white");
+
+                int index = 1;
+                for (Element e : bgc) {
+                    if (index == 13) {
+                        return e.text();
                     }
+                    index++;
                 }
-
-                //获取 cookie
-                cookie = response.getFirstHeader("Set-Cookie").getValue();
-                cookie = cookie.substring(0, cookie.indexOf(";"));
-
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
@@ -243,6 +195,7 @@ public class HttpClientUtil {
                 e.printStackTrace();
             }
         }
+        return "";
     }
 
     /**

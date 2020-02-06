@@ -37,6 +37,12 @@ public class InfoServiceImpl implements InfoService {
         return JsonUtil.parseCourses(courses);
     }
 
+    @Override
+    public String getUtility(String buildId, String roomCode) {
+        HttpClientUtil httpClientUtil = new HttpClientUtil();
+        return httpClientUtil.getUtility(buildId, roomCode);
+    }
+
     /**
      * 登录获取 Cookie
      * @param username
