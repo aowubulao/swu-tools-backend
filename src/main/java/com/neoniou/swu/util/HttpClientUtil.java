@@ -1,6 +1,5 @@
 package com.neoniou.swu.util;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -31,6 +30,7 @@ public class HttpClientUtil {
 
     private PoolingHttpClientConnectionManager httpClientPool;
 
+    private static final String PORTAL_URL = "https://uaaap.swu.edu.cn/cas/login?service=http://i.swu.edu.cn/PersonalApplications/viewPageV3";
     private static final String GRADE_URL = "http://jw.swu.edu.cn/jwglxt/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=N305005";
     private static final String COURSE_URL = "http://jw.swu.edu.cn/jwglxt/kbcx/xskbcx_cxXsKb.html?gnmkdm=N2151";
     private static final String UTILITY_URL = "http://211.83.23.198/account.do?command=login";
@@ -196,6 +196,30 @@ public class HttpClientUtil {
             }
         }
         return "";
+    }
+
+    /**
+     * 测试连接，返回状态码
+     * @return
+     */
+    public int testConnect() {
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(this.httpClientPool).build();
+
+        CloseableHttpResponse response = null;
+        try {
+            response = httpClient.execute(new HttpGet(PORTAL_URL));
+            return response.getStatusLine().getStatusCode();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert response != null;
+                response.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return 500;
     }
 
     /**

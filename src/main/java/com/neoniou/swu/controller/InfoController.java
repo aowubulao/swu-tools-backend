@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/swu/info")
 public class InfoController {
 
+    private final InfoService infoService;
     @Autowired
-    private InfoService infoService;
+    public InfoController(InfoService infoService) {
+        this.infoService = infoService;
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(InfoController.class);
 
@@ -33,7 +36,7 @@ public class InfoController {
                                             @RequestParam("password") String password,
                                             @RequestParam("xnm") String xnm,
                                             @RequestParam("xqm") String xqm) {
-        logger.info("user: [{}] get grades", username);
+        logger.info("user: {} get grades", username);
         // Exchange
         xqm = XqmUtil.exchange(xqm);
 
@@ -53,7 +56,7 @@ public class InfoController {
                                              @RequestParam("password") String password,
                                              @RequestParam("xnm") String xnm,
                                              @RequestParam("xqm") String xqm) {
-        logger.info("user: [{}] get courses", username);
+        logger.info("user: {} get courses", username);
         // Exchange
         xqm = XqmUtil.exchange(xqm);
 
@@ -69,13 +72,17 @@ public class InfoController {
     @GetMapping("/utility")
     public ResponseEntity<String> getUtility(@RequestParam("buildId") String buildId,
                                              @RequestParam("roomCode") String roomCode) {
-        logger.info("buildId: [{}], roomCode: [{}] query balance", buildId, roomCode);
+        logger.info("buildId: {}, roomCode: {} query balance", buildId, roomCode);
         if (roomCode.length() != 4) {
             roomCode = "0" + roomCode;
         }
         return ResponseEntity.ok().body(infoService.getUtility(buildId, roomCode));
     }
 
+    /**
+     * Test method
+     * @return hello
+     */
     @GetMapping("/hello")
     public ResponseEntity<String> test() {
         logger.info("Hello has been used");
