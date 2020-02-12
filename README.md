@@ -15,12 +15,12 @@
 在resources目录下创建application.yaml文件并进行配置
 
 ```yaml
+#端口
 server:
-  #端口
   port:
+#名称
 spring:
   application:
-  	#名称
     name: 
   main:
     allow-bean-definition-overriding: true
