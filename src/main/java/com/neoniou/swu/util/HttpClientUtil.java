@@ -210,7 +210,7 @@ public class HttpClientUtil {
             response = httpClient.execute(new HttpGet(PORTAL_URL));
             return response.getStatusLine().getStatusCode();
         } catch (Exception e) {
-            e.printStackTrace();
+            MailUtil.sendPromptMail("Web Error", "Restart vpn service");
         } finally {
             try {
                 assert response != null;
